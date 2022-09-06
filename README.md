@@ -1,46 +1,13 @@
-usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]
-           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
-           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-           [--super-prefix=<path>] [--config-env=<name>=<envvar>]
-           <command> [<args>]
+# BIOS-611
+For BIOS 611 class
 
-These are common Git commands used in various situations:
+Dataset introduction: Stephen Curry stats 2009-2021 in NBA
+Yuchen/Tappy Li 
 
-start a working area (see also: git help tutorial)
-   clone             Clone a repository into a new directory
-   init              Create an empty Git repository or reinitialize an existing one
+The dataset I choose from Kaggle is Stephen Curry stats from 2009 to 2022 seasons by MUJIN JO’s newest version. Its contents can be divided into two sections:  Golden State Warriors team stats, (such as win/loss, team score, the opponent team name, game date, etc.) and Stephen Curry player stats (such as minutes played in the game, field goals made, three pointers made, rebounds, assists, blocks, etc.). Among all other basketball datasets, I pick this one because of its useability and its focus on my favorite player, Stephen Curry. One thing that makes this dataset useable is its broad variable coverage. This dataset has complete stats dating back to 2009, and the newest data lastly updated in January 23, 2022. Since it contains both overall stats and Stephen Curry specific stats, I can arrive at my conclusions based on analysis from both angles. I would be able to explain problems more comprehensively. This dataset is also meaningful when Golden State Warriors want to change Curry’s contract or decide on if they will trade him to other teams (only hypothetically). 
 
-work on the current change (see also: git help everyday)
-   add               Add file contents to the index
-   mv                Move or rename a file, a directory, or a symlink
-   restore           Restore working tree files
-   rm                Remove files from the working tree and from the index
-   sparse-checkout   Initialize and modify the sparse-checkout
+After initial cleaning and tidying the dataset, I plan to do explanatory data analysis for an overview of Curry’s and GSW team’s performance throughout this 14 years period. I plan to focus my project on two problems: (1) Is Curry’s performance improving throughout his career? (2) Is Curry a key player in his team?
 
-examine the history and state (see also: git help revisions)
-   bisect            Use binary search to find the commit that introduced a bug
-   diff              Show changes between commits, commit and working tree, etc
-   grep              Print lines matching a pattern
-   log               Show commit logs
-   show              Show various types of objects
-   status            Show the working tree status
+To approach problem (1), I plan to separate the data into “Curry” section and “GSW Team” section, and use “Curry” section mainly for my analysis. For “Curry” section of the dataset, I plan to visualize his history stats from 2009 to 2021 season. Maybe I can start with marking out the peak (maximum), the bottom (minimum), and significant upward/downward trends (slopes). Then, I plan to try fitting a comprehensive model using these values to explain the fluctuation of Curry’s performance from his personal perspective. The final goal of problem (1) will be to train my model using 2009-2021 season data and see if his performance of 2022 season can be predicted using historic data. Since this dataset has been recently updated with 2022 season data, I can use this part as my test data to validate my model.
 
-grow, mark and tweak your common history
-   branch            List, create, or delete branches
-   commit            Record changes to the repository
-   merge             Join two or more development histories together
-   rebase            Reapply commits on top of another base tip
-   reset             Reset current HEAD to the specified state
-   switch            Switch branches
-   tag               Create, list, delete or verify a tag object signed with GPG
-
-collaborate (see also: git help workflows)
-   fetch             Download objects and refs from another repository
-   pull              Fetch from and integrate with another repository or a local branch
-   push              Update remote refs along with associated objects
-
-'git help -a' and 'git help -g' list available subcommands and some
-concept guides. See 'git help <command>' or 'git help <concept>'
-to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system.
+For problem (2), I will first do lots of data visualization, giving graphs and tables for Golden States Warriors overall performance with 2009-2021 part of data. I expect there will be many games that Curry doesn’t play much due to injuries, so I will need to clean and filter the dataset before I can begin my analysis. Based on Curry’s presence, I can start digging if team’s performance, such as Win/Loss and total score, are caused by Curry or by other factors. To arrive at a conclusion, I may need to look up GSW news on the Internet to find out possible causes of GSW’s performance. (Ex. When Klay Thompson was injured, we cannot blame Curry for his team’s poor play.) 
