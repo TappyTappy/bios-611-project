@@ -1,6 +1,6 @@
 BIOS 611 Project: Stephen Curry stats 2009-2021 in NBA
 ======================================================
-# Yuchen/Tappy Li 
+### Yuchen/Tappy Li 
 
 Dataset introduction: Stephen Curry stats 2009-2021 in NBA
 
