@@ -2,12 +2,99 @@ BIOS 611 Project: Stephen Curry stats 2009-2021 in NBA
 ======================================================
 #### Author: Yuchen/Tappy Li 
 ###### Data Source: Kaggle by MUJIN JO
-Dataset introduction: Stephen Curry stats 2009-2021 in NBA
 
-The dataset I choose from Kaggle is Stephen Curry stats from 2009 to 2022 seasons by MUJIN JO’s newest version. Its contents can be divided into two sections:  Golden State Warriors team stats, (such as win/loss, team score, the opponent team name, game date, etc.) and Stephen Curry player stats (such as minutes played in the game, field goals made, three pointers made, rebounds, assists, blocks, etc.). Among all other basketball datasets, I pick this one because of its useability and its focus on my favorite player, Stephen Curry. One thing that makes this dataset useable is its broad variable coverage. This dataset has complete stats dating back to 2009, and the newest data lastly updated in January 23, 2022. Since it contains both overall stats and Stephen Curry specific stats, I can arrive at my conclusions based on analysis from both angles. I would be able to explain problems more comprehensively. This dataset is also meaningful when Golden State Warriors want to change Curry’s contract or decide on if they will trade him to other teams (only hypothetically). 
+Project Instructions
+====================
 
-After initial cleaning and tidying the dataset, I plan to do explanatory data analysis for an overview of Curry’s and GSW team’s performance throughout this 14 years period. I plan to focus my project on two problems: (1) Is Curry’s performance improving throughout his career? (2) Is Curry a key player in his team?
+This repository is best used via Docker. 
+Please see Dockerfile for more information related to specific commands.
 
-To approach problem (1), I plan to separate the data into “Curry” section and “GSW Team” section, and use “Curry” section mainly for my analysis. For “Curry” section of the dataset, I plan to visualize his history stats from 2009 to 2021 season. Maybe I can start with marking out the peak (maximum), the bottom (minimum), and significant upward/downward trends (slopes). Then, I plan to try fitting a comprehensive model using these values to explain the fluctuation of Curry’s performance from his personal perspective. The final goal of problem (1) will be to train my model using 2009-2021 season data and see if his performance of 2022 season can be predicted using historic data. Since this dataset has been recently updated with 2022 season data, I can use this part as my test data to validate my model.
+Information about Docker
+------------------------
 
-For problem (2), I will first do lots of data visualization, giving graphs and tables for Golden States Warriors overall performance with 2009-2021 part of data. I expect there will be many games that Curry doesn’t play much due to injuries, so I will need to clean and filter the dataset before I can begin my analysis. Based on Curry’s presence, I can start digging if team’s performance, such as Win/Loss and total score, are caused by Curry or by other factors. To arrive at a conclusion, I may need to look up GSW news on the Internet to find out possible causes of GSW’s performance. (Ex. When Klay Thompson was injured, we cannot blame Curry for his team’s poor play.) 
+Docker builds an environment which
+contains all the softwares and tools needed for the project. 
+User can use Docker to run the project without having to install tedious softwares and libraries.
+
+How to get started
+------------------
+
+To build Docker on your device, you will need to create a file called
+`.password` which contains the password you'd like to use for the
+rstudio user in the Docker container. 
+Then you run:
+
+```
+docker build . --build-arg linux_user_pwd="$(cat .password)" -t SCurry
+```
+
+This code creates a docker container. Then you run:
+
+```
+docker run -v $(pwd):/home/rstudio/ashar-ws\
+           -p 8787:8787\
+           -p 8888:8888\
+           -e PASSWORD="$(cat .password)"\
+           -it ashar
+```
+This code starts up the user rstudio in Docker environment.
+
+You then visit http://localhost:8787 via a browser on your device to
+access Docker rstudio environment.
+
+Project Organization
+====================
+
+Please see the Makefile for project structure.
+
+Information about Makefile
+--------------------------
+
+Makefile is a textual description of the relationships between artifacts. 
+It documents instructions and objects needed to construct each artifact.
+User can use tool make to reproduce every artifact by issueing the corresponding command.
+
+Consider this snippet from the Makefile included in this project:
+
+```
+# Since our clustering is based on a variational auto-encoder it is
+# difficult to understand what the clusters represent.  Here we use
+# gradient boosting to train a tree model on the raw data to predict
+# each cluster. From this model we can extract the important variables
+# for each cluster and report their medians. We simply save the labels
+# here for future use.
+derived_data/cluster_labels.csv: .created-dirs explain_encoding.R derived_data/demographic_ae_sdf.csv
+	Rscript explain_encoding.R
+```
+
+The lines with `#` are comments which just describe the target. Here
+we describe an artifact (`derived_data/cluster_labels.csv`), its
+dependencies (`.created-dirs`, `explain_encoding.R`,
+`derived_data/demographic_ae_sdf.csv`) and how to build it `Rscript
+explain_encoding.R`. If we invoke Make like so:
+
+```
+make derived_data/???.csv
+```
+
+Make will construct this artifact for us. If the dependency
+`derived_data/demographic_ae_sdf.csv` doesn't exist for some reason it
+will _also_ construct that artifact on the way. This greatly
+simplifies the reproducibility of builds and also documents
+dependencies.
+
+Analysis Goal
+===============
+
+
+Results
+=======
+
+In progress... 
+But for results so far, you can access it with:
+
+```
+make writeup.pdf
+```
+This command will build my project report.
+
