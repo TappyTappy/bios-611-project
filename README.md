@@ -1,7 +1,7 @@
 BIOS 611 Project: Stephen Curry stats 2009-2021 in NBA
 ======================================================
-### Yuchen/Tappy Li 
-
+#### Yuchen/Tappy Li 
+###### Kaggle
 Dataset introduction: Stephen Curry stats 2009-2021 in NBA
 
 The dataset I choose from Kaggle is Stephen Curry stats from 2009 to 2022 seasons by MUJIN JO’s newest version. Its contents can be divided into two sections:  Golden State Warriors team stats, (such as win/loss, team score, the opponent team name, game date, etc.) and Stephen Curry player stats (such as minutes played in the game, field goals made, three pointers made, rebounds, assists, blocks, etc.). Among all other basketball datasets, I pick this one because of its useability and its focus on my favorite player, Stephen Curry. One thing that makes this dataset useable is its broad variable coverage. This dataset has complete stats dating back to 2009, and the newest data lastly updated in January 23, 2022. Since it contains both overall stats and Stephen Curry specific stats, I can arrive at my conclusions based on analysis from both angles. I would be able to explain problems more comprehensively. This dataset is also meaningful when Golden State Warriors want to change Curry’s contract or decide on if they will trade him to other teams (only hypothetically). 
