@@ -33,14 +33,14 @@ This code creates a docker container. Then you run:
 ```
 docker run -v $(pwd):/home/rstudio/ashar-ws\
            -p 8787:8787\
-           -p 8888:8888\
            -e PASSWORD="$(cat .password)"\
            -it ashar
 ```
 This code starts up the user rstudio in Docker environment.
 
 You then visit http://localhost:8787 via a browser on your device to
-access Docker rstudio environment.
+access Docker rstudio environment. (Note: `-p 8888:8888\` is the command used to start a python environment. 
+This type of files will be added in the future.)
 
 Project Organization
 ====================
