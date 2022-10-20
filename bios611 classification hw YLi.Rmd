@@ -1,0 +1,170 @@
+---
+title: "bios611 classification hw"
+author: "Yuchen Li"
+date: "2022-10-14"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(tidyverse)
+library(matlab)
+library(pROC)
+characters <- read_csv("https://github.com/Vincent-Toups/datasci611/raw/main/lectures/12-classification/source_data/prime_earth_characters.csv") %>% 
+  distinct()
+powers <- read.csv("https://github.com/Vincent-Toups/datasci611/raw/main/lectures/12-classification/source_data/prime_earth_powers.csv") %>% 
+  select(-url) %>% 
+  distinct()
+
+```
+
+# Q1
+## (a) Use PCA to reduce dimension to 6
+```{r}
+powers_wide <- pivot_wider(powers, id_cols = c("character", "universe"), names_from = "power", values_from = "power", values_fill = 0, values_fn = function(x){1})
+  
+pca_results <- prcomp(powers_wide %>% 
+                        select(-character, -universe) %>%
+                        as.matrix())
+power_projection <- pca_results$x %>% as.tibble() %>% 
+  select(PC1:PC6) %>%
+  mutate(character=powers_wide$character, universe=powers_wide$universe) %>%
+  inner_join(characters %>% filter(property_name=="gender" & value %in% c("male", "female")) %>%
+               transmute(character=character, universe=universe, male=1*(value=="male")),
+             by=c("character", "universe")) %>%
+  mutate(train=runif(nrow(.))<0.75)
+
+power_train <- power_projection %>% filter(train) %>% select(-train)
+power_test <- power_projection %>% filter(!train) %>% select(-train)
+
+```
+## (b)&(c) GLM Model and  roc plot
+```{r}
+model <- glm(male ~ PC1+PC2+PC3+PC4+PC5+PC6, family = binomial, data = power_train)
+
+power_test$male_p <- predict(model, newdata=power_test, type="response")
+roc_object <- roc(power_test$male, power_test$male_p)
+
+plot(roc_object)
+summary(model)
+```
+From the model summary, we can see that some PCs(PC4, PC5) are significant. We can imporove our model by eliminating some unnecessary variables. Looking at the roc plot, the area under the curve is about 0.5, which implies that the test is not very accurate. 
+
+# Q2
+```{r}
+library(gbm)
+
+power_wide_aug <- powers_wide  %>% inner_join(characters %>%
+                                                filter(property_name=="gender" & value %in%c("male", "female")) %>%
+                                                transmute(character=character, universe=universe, male=1*(value=="male")),
+                                              by=c("character","universe"))
+
+explanatory <-power_wide_aug %>% select(-character, -universe, -male) %>% names()
+f <- formula(sprintf("male~ %s", power_wide_aug %>% select(accelerated_healing:zombie_physiology) %>%
+                       names() %>% paste(collapse = " + ")))
+
+train <- runif(nrow(power_wide_aug))<0.75
+test <- power_wide_aug %>%  filter(!train)
+
+gbm_model <- gbm(f, data=power_wide_aug %>% dplyr::filter(train))
+
+#summary(gbm_model)
+```
+Some important informative componnets are divine_empowerment, superhuman_strength, and unique_physiology.
+
+
+```{r}
+test <- power_wide_aug %>% filter(!train) 
+test$male_p <- predict(gbm_model, newdata = power_wide_aug %>% dplyr::filter(!train))
+
+#name_map = list("0:0"="true negative",
+#                "0:1"="false positive",
+#               "1:0"="false negative",
+#"1:1"="true positive")
+
+#test_ex <- test %>% mutate(male_p=as.factor(male_p))
+
+#confusion <- test %>% group_by(male, male_p) %>% tally() %>% 
+  #mutate(rate_type=name_map[sprintf("%d:%d", male, male_p)] %>% unlist()) %>%
+  #select(-male, -male_p) %>%
+  #transmute(rate_type=rate_type, rate = n/sum(n))
+#confusion
+roc_info <- roc(test$male, test$male_p)
+plot(roc_info)
+
+```
+The area under the curve is about 0.5. We can conclude that this test is not very accurate. We cam imporve our model with further analysis, such as cross-validation.
+
+```{r}
+TPR <- roc_info$sensitivities/(roc_info$sensitivities+roc_info$specificities)
+cat("True positive rate is", mean(TPR))
+FPR <- (1-roc_info$sensitivities)/((1-roc_info$sensitivities)+(1-roc_info$specificities))
+cat("False positive rate is", mean(FPR))
+TNR <- (1-roc_info$specificities)/((1-roc_info$specificities)+(1-roc_info$sensitivities))
+cat("True negative rate is",mean(TNR))
+FNR <- (1-roc_info$sensitivities)
+cat("False negative rate is",mean(FNR))
+
+Recall <- roc_info$specificities
+cat("Recall is ",mean(Recall))
+    
+Precision <- roc_info$sensitivities
+cat("Precision is ",mean(Precision))
+
+F1 <- mean(Recall)*mean(Precision)/(mean(Recall)+mean(Precision))
+cat("F1 scorel is ",F1)
+
+```
+I report the average of each item to represent average rate. 
+
+# Q3
+```{r}
+powers_wide_aug <- powers_wide %>%
+  inner_join(characters %>%filter(property_name=="gender") %>%
+               transmute(character=character, universe=universe, 
+                         traditional_gender = ifelse(value %in% c("male","female"),1,0)),
+             by=c("character","universe"))
+f <- formula(sprintf("traditional_gender ~%s",
+                     powers_wide_aug %>% select(accelerated_healing:zombie_physiology) %>%
+                       names() %>% paste(collapse = " + ")))
+train <- runif(nrow(powers_wide_aug))<0.75
+
+gbm_model <- gbm(f, data = powers_wide_aug %>% dplyr::filter(train))
+
+test <- powers_wide_aug %>% filter(!train)
+test$traditional_gender_p <- predict(gbm_model, newdata = powers_wide_aug %>% dplyr::filter(!train))
+roc_info1 <- roc(test$traditional_gender, test$traditional_gender_p)
+plot(roc_info1)
+summary(roc_info1)
+             
+```
+
+```{r}
+TPR <- roc_info1$sensitivities/(roc_info$sensitivities+roc_info$specificities)
+cat("True positive rate is", mean(TPR))
+FPR <- (1-roc_info1$sensitivities)/((1-roc_info$sensitivities)+(1-roc_info$specificities))
+cat("False positive rate is", mean(FPR))
+TNR <- (1-roc_info1$specificities)/((1-roc_info$specificities)+(1-roc_info$sensitivities))
+cat("True negative rate is",mean(TNR))
+FNR <- (1-roc_info1$sensitivities)
+cat("False negative rate is",mean(FNR))
+
+Recall <- roc_info1$specificities
+cat("Recall is ",mean(Recall))
+    
+Precision <- roc_info1$sensitivities
+cat("Precision is ",mean(Precision))
+
+F1 <- mean(Recall)*mean(Precision)/(mean(Recall)+mean(Precision))
+cat("F1 scorel is ",F1)
+
+```
+
+
+
+
+
