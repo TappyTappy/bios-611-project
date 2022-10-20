@@ -1,6 +1,6 @@
 BIOS 611 Project: Stephen Curry stats 2009-2021 in NBA
 ======================================================
-##### Yuchen/Tappy Li 
+#### Author: Yuchen/Tappy Li 
 ###### Data Source: Kaggle by MUJIN JO
 Dataset introduction: Stephen Curry stats 2009-2021 in NBA
 
