@@ -16,31 +16,32 @@ Docker builds an environment which
 contains all the softwares and tools needed for the project. 
 User can use Docker to run the project without having to install tedious softwares and libraries.
 
-How to get started
+To start
 ------------------
 
-To build Docker on your device, you will need to create a file called
-`.password` which contains the password you'd like to use for the
-rstudio user in the Docker container. 
+To build the docker image, you run
+
+```
+docker build . -t Yl611proj
+```
+
 Then you run:
 
 ```
-docker build . --build-arg linux_user_pwd="$(cat .password)" -t SCurry
+docker run -v $(pwd):/home/rstudio/project -p 8787:8787 -e PASSWORD=<1234>
 ```
 
-This code creates a docker container. Then you run:
-
-```
-docker run -v $(pwd):/home/rstudio/ashar-ws\
-           -p 8787:8787\
-           -e PASSWORD="$(cat .password)"\
-           -it ashar
-```
 This code starts up the user rstudio in Docker environment.
 
 You then visit http://localhost:8787 via a browser on your device to
 access Docker rstudio environment. (Note: `-p 8888:8888\` is the command used to start a python environment. 
 This type of files will be added in the future.)
+
+To reproduce thhe final report, visit the terminal in rstudio and run:
+
+```
+make report.pdf
+```
 
 Project Organization
 ====================
