@@ -51,7 +51,10 @@ Please see the Makefile for project structure.
 
 Analysis Goal
 ===============
-
+This project focuses on:
+1. Stephen Curry's changes in skills over time.
+2. Stephen Curry's influence on whole team.
+3. Predict Golden State Warriors' future game result based on Stephen Curry's statistics.
 
 Results
 =======
@@ -60,7 +63,7 @@ In progress...
 But for results so far, you can access it with:
 
 ```
-make writeup.pdf
+make report.pdf
 ```
 This command will build my project report.
 
