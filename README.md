@@ -22,19 +22,19 @@ To start
 To build the docker image, you run
 
 ```
-docker build . -t yl
+docker build . -t 611
 ```
 
 Then you run:
 
 ```
-docker run -v $(pwd):/home/rstudio/project -p 8787:8787 --rm -it yl
+docker run -v $(pwd):/home/rstudio/work -p 8787:8787 -e PASSWORD=work -it 611
 ```
 
-This code starts up the user rstudio in Docker environment.
+This code starts up the user rstudio in Docker environment. Please set working directory to current work directory in rstudio. 
 
 You then visit http://localhost:8787 via a browser on your device to
-access Docker rstudio environment. (Note: `-p 8888:8888\` is the command used to start a python environment. 
+access Docker rstudio. (Note: `-p 8888:8888\` is the command used to start a python environment. 
 This type of files will be added in the future.)
 
 To reproduce thhe final report, visit the terminal in rstudio and run:
