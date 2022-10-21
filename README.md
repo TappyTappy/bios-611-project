@@ -22,13 +22,13 @@ To start
 To build the docker image, you run
 
 ```
-docker image build . -t yl
+docker build . -t yl
 ```
 
 Then you run:
 
 ```
-docker run -v $(pwd):/home/rstudio/project -p 8787:8787 -it yl
+docker run -v $(pwd):/home/rstudio/project -p 8787:8787 --rm -it yl
 ```
 
 This code starts up the user rstudio in Docker environment.
