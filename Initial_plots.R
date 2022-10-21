@@ -4,8 +4,8 @@
 library(tidyverse)
 
 # df <- read_csv("https://raw.githubusercontent.com/TappyTappy/bios-611-project/main/source%20data/Stephen%20Curry%20Stats.csv")
-
-sc_stats <- sc_stats %>% select(Season_year, Season_div, MIN, `FG%`, `3P%`, PTS)
+df <- read_csv("derived_data/sc_stats.csv")
+sc_stats <- df %>% select(Season_year, Season_div, MIN, `FG%`, `3P%`, PTS)
 
 
 
