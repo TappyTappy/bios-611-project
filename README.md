@@ -22,7 +22,7 @@ To start
 To build the docker image, you run
 
 ```
-docker build . -t Yl611proj
+docker build . -t yl611proj
 ```
 
 Then you run:
