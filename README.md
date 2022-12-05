@@ -1,7 +1,12 @@
-BIOS 611 Project: Stephen Curry stats 2009-2021 in NBA
+BIOS 611 Project:  The 2017 Astro’s sign-stealing scandal 
 ======================================================
 #### Author: Yuchen/Tappy Li 
-###### Data Source: Kaggle by MUJIN JO
+#### Contributors: Fab Joseph, Grant Mcgrew, and Ariel Wang
+
+Data Source
+===========
+Data is Plural (http://signstealingscandal.com/files/) platform, collected by an Astros fan named Tony Adams who rewatched home games from the 2017 season and charted pitches and bangs (the way the Astros cheated was by banging on trash cans to indicate what pitch was coming). 
+For easy viewing: https://docs.google.com/spreadsheets/d/1Zm2ndPtTIl3n569JViVz8ki2hJW2lpYHvRjQZV_32dk/edit?usp=sharing. 
 
 Project Instructions
 ====================
@@ -49,21 +54,26 @@ Project Organization
 Please see the Makefile for project structure.
 
 
-Analysis Goal
+Analysis Goal:  Create a model that predicts the effect of sign stealing (win or loss).
 ===============
 This project focuses on:
-1. Stephen Curry's changes in skills over time.
-2. Stephen Curry's influence on whole team.
-3. Predict Golden State Warriors' future game result based on Stephen Curry's statistics.
+1. The usual outcome of a batting event when a bang was heard (single, double, home run, or grand slam).
+2. If the number of bangs were different for each opponent or were they more heavily used against better opposition.
+3. If we were to plot a player’s On-base Plus Slugging (OPS), which measures how well a hitter can reach base and hit for power, before they engaged in sign-stealing, so 2016, compared to their (OPS) in 2017, when they did engage in sign-stealing, how would these numbers differ.
+4. How the slugging percentage (SLG), which measures the number of bases a player records at-bat, for batters batting with a bang and batters batting without a bang, differed in 2017.
 
 Results
 =======
+Brief findings: the Astros generally did not appear to use their cheating mechanism more in important situations, and when they did use it, the outcomes were not very different from the usual.
 
-In progress... 
-But for results so far, you can access it with:
+You can access project report via:
 
 ```
 make report.pdf
 ```
 This command will build my project report.
+
+
+
+
 
