@@ -8,43 +8,78 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-# Stephen Curry stats in NBA from 2009 to 2021
-
 ## Introduction
+For anyone unfamiliar with the sport of baseball, this data science project may be confusing to you, however, you only need to know the basics of the game to grasp a complete understanding of this project. In baseball, a player on one team throws a ball at a player on the other team, who tries to hit the ball with a bat. The player throwing the ball is the pitcher and the player trying to hit the ball is the batter. If the batter knew exactly how the pitcher was throwing, the batter would be more likely to hit the ball and earn a run.\
 
-The dataset I choose from Kaggle is Stephen Curry stats from 2009 to 2022 seasons by MUJIN JO’s newest version. Its contents can be divided into two sections: Golden State Warriors team stats, (such as win/loss, team score, the opponent team name, game date, etc.) and Stephen Curry player stats (such as minutes played in the game, field goals made, three pointers made, rebounds, assists, blocks, etc.). Among all other basketball datasets, I pick this one because of its useability and its focus on my favorite player, Stephen Curry. One thing that makes this dataset useable is its broad variable coverage. This dataset has complete stats dating back to 2009, and the newest data lastly updated in January 23, 2022. Since it contains both overall stats and Stephen Curry specific stats, I can arrive at my conclusions based on analysis from both angles. I would be able to explain problems more comprehensively. This dataset is also meaningful when Golden State Warriors want to change Curry’s contract or decide on if they will trade him to other teams (only hypothetically). 
+The responsibility for selecting the type of pitch is usually made by the catcher. The catcher is positioned directly behind the batter and flashes signals to their pitcher to call for a specific pitch. While other teams could start to decipher the signs by recognizing a pattern or sequence, the MLB prohibits the use of electronic equipment to steal signs made by the catcher.\
 
-## Goal
+In 2017, the Houston Astros illegally used a camera, placed in center field, to steal signs during games. Members affiliated with the organization would relay to their hitters what pitch was coming by hitting a garbage can and producing “bangs.” The Astro’s sign-stealing scandal is one of the most recent stories to shock the major sports world. In the fallout from this scandal, Astros owner Jim Crane said that the sign-stealing "didn't impact the game." This is the main motivation for studying this dataset and trying to answer our main question, whether or not the cheating had an impact on the Astros winning or losing. Our other research questions will buttress our final answer.\
 
-This project focuses on:
-1. Stephen Curry's changes in skills over time.
-2. Stephen Curry's influence on whole team.
-3. Predict Golden State Warriors' future game result based on Stephen Curry's statistics.
+## Study Goal:analysis the effect of sign stealing in the 2017 Astro’s sign-stealing scandal.
+This project focuses on:\
+1. The usual outcome of a batting event when a bang was heard (single, double, home run, or grand slam).\
+2. If the number of bangs were different for each opponent or were they more heavily used against better opposition.\
+3. If we were to plot a player’s On-base Plus Slugging (OPS), which measures how well a hitter can reach base and hit for power, before they engaged in sign-stealing, so 2016, compared to their (OPS) in 2017, when they did engage in sign-stealing, how would these numbers differ.\
+4. How the slugging percentage (SLG), which measures the number of bases a player records at-bat, for batters batting with a bang and batters batting without a bang, differed in 2017.\
 
-## Plots
 
-Below is a bar plot of average minutes Stephen Curry played in each year's pre-season games. We can see that he has lowest on-court time in 2012-2013 pre-season. During this pre-season, Curry just came back from anckle injury rehabilitation. Coach Kerr and the team could want to give him a slow-paced return. I plan to conduct a model of Warrior's game results using Curry's status in the games (ex. minutes played, shooting percentages) as predictors.
+## Problem Analysis
+
+Below is a bar plot showing that the heavy majority of pitches in the data set had no bangs
 ```{r echo=FALSE}
-readRDS("figures/pre_avg_min_plot.rds")
+readRDS("figures/NBbP1.rds")
 ```
 
-Below is a box plot of Curry's average percent of field goal made in pre-season of each year. There're some interesing pattern:
-1. Curry didn't play much in 2013-2013 pre-season, but his percent of field goal made was near average level. It woulde make more sense if compared with team total score and game result. Also, further analysis can be made when taking regular season and post-season records into account.
-2. There is a rough trend that Curry's field goal percent in pre-season improved over the years. More analysis can be done to verify this trend and see if other skills (ex. 3-pointer percent, free throw percent) imporved over the years. It would also be meaningful if we take 
+Graph below: we look only at the pitches with at least one bang. We can clearly see that most of these pitches only had one bang, although there are a fair amount with two bangs, as well. After that, the numbers for three, four, and five bangs were relatively small. This graph also shows that each distinct number of bangs could result in different pitch categories.
 ```{r echo=FALSE}
-readRDS("figures/pre_avg_FGP_plot.rds")
+readRDS("figures/NBbP2.rds")
+```
+
+
+Graph below: When there were 4 bangs or 5 bangs, it usually indicated a fastball. However, there were so few of these that this may not hold much information. For the much more common 1-3 bangs, we can see that the majority of pitches were breaking balls, and an even higher percentage were offspeed pitches (when including change ups in addition to breaking balls). This information holds up with a lot of what was reported about the scandal (that the bangs were used to signal breaking balls).
+```{r}
+readRDS("figures/NBbP3.rds")
 
 ```
 
-## Tables
-In progress...
+Graph below: The useage of bangs generally increased over time, at least in the sense that later games tended to have more bangs than games early in the seaon (it was not a constant increase). The numbers did randomly decrease sharply for the last couple of games, but for a large part of the season after the numbers first spiked up, there were about 35-40 pitches with bangs per game. These per game numbers were used a lot in the modeling we did later.
+```{r}
+readRDS("figures/NPwB.rds")
+```
 
-## Dimisionality Reduction
-In progress...
+In this plot and similar ones that follow, the red bars stand for the data set including the pitches with bangs, while the blue bars represent the data set of pitches without bangs. In these types of graphs, we are charting the percentage of a certain situation or outcome. In each case, this is done as a percentage out of each individual data set. There were a lot more pitches without bangs in the data set, so looking at pure numbers would not have been as easy to understand. Instead, we looked at percentages out of the total group (with bangs or without bangs) to see if there was actually something interesting that was happening. 
+```{r}
+readRDS("figures/POB.rds")
+
+```
+
+In graph below, I wanted to determine whether the use of bangs was situational in terms of the runners on base (runners on base is a good time to score, so it would seemingly be a good time to gain and advantage). For clarification, the 0 means no runners on base, and the rest of the categories indicate which combination of bases had runners on them. Overall, it looks like the percentages for each situation are pretty similar for pitches with bangs compared to those without bangs. It was actually more common that bangs were used with no runners on base, and it appears bangs were used less often in situations where runners were in scoring postions (2nd and 3rd base).
+```{r}
+readRDS("figures/POB_bat.rds")
+```
+
+Following graph aims to analyze the percentage of pitches with bangs for each individual batter. From the graph, we can see that J.D. Davis had the highest rate of bangs at over 25%. Max Stassi and Tyler White were also at or over the 25% mark. Tony Kemp is the only player that did not have bangs on any of his pitches. Jose Altuve had the lowest percentage out of players that used bangs. This is very interesting because he was one of the main targets of fans and the media during the scandal. Altuve is one of the Astros' best players and he won the AL MVP award in this season. Maybe the sign-stealing was not what led him to such a great season (there are accusations that he wore a buzzer underneath his jersey, which would have made him need the bangs less perhaps, but there is no clear evidence of this and was mostly just a joke people were making). Some of the Astros' other best players, Alex Bregman and George Springer, were in the middle of players in terms of their usage of bangs and sign-stealing. While the pure number of pitches with bangs was higher for some of the Astros' better players (shown in chart), these players also had far more pitches thrown to them as compared to others. When looking at the bangs as a percentage of total pitches, some of these players came down on the list, which shows that the Astros did not necessarily cheat at a higher rate with their better players in order to maybe gain an advantage. Players with a higher pure number of pitches with bangs are shown on the right side of the graph (these are generally the better players, as well).
+```{r}
+readRDS("figures/player.rds")
+```
+
+
+This analysis aims to look at which teams the Astros cheated against the most. This graph is ordered so that teams with higher winning percentages (the better teams) appear on the right side. From this, we know that Oakland and Seattle were the teams with the most bangs used against them. Both of these teams are in the same division as the Astros, so they play each other a lot more. Texas and Los Angeles (Angels) are also in the same division as the Astros, but they did not have as many bangs used against them. The White Sox, Twins, Rays, Blue Jays, and Nationals all had lots of bangs used against them. These teams were also very high when looking at the bangs as a percentage of total pitches thrown against that team (last graph). When looking at this statistic, the Yankees and Diamondbacks also jumped to the very top. There is definitely a group on the right side of the last graph that had a lot used against them per game, and these were the better teams, so maybe the Astros wanted an advantage against them. However, there are also a few teams towards the left side with high per game numbers too. Interestinly, both Oakland and Seattle fell down a bit when viewing the pitches with bangs as a percentage of the total pitches faced against that team. Even though they are not among the best teams, these teams are divisional opponents (so are Texas and LA) with the Astros, so they compete directly for a playoff spot. These would seemingly be some of the most important games, but the usage of bangs as a percentage was relatively low against all four of these teams. From this graph, we can gather that the Astros did not seem use their cheating in order to gain a special advantage over divisional teams in order to help them make the playoffs. 
+```{r}
+readRDS("figures/opponent.rds")
+```
+
+Since the percentages of each outcome are pretty similar for pitches with bangs versus those without bangs, it does not appear as if the cheating made a considerable impact on the outcome of an individual pitch. See graph below
+```{r}
+readRDS("figures/individual.rds")
+```
+
 
 ## Modeling
-In progress...
+Here, I have 4 different models to test the accuracy of. GLM and LASSO methods were used to produce those models. The first has predictors runs_for and w_pct. The second adds num_bangs on top of these two. The third model uses runs_against and w_pct as predictors for result, and the fourth adds num_bangs on top of these two. The accuracy values are the same again for the first two corresponding models (corresponding by just adding num_bangs). However, the fourth model, which inludes num_bangs, is more accurate than the third model it corresponds to, which does not include num_bangs. This is the first time we have seen anything like this. In other words, something that might suggest that the amount the Astros cheated and used bangings actually impacted the result of the game (and can therefore help us predict the outcome). However, this is just too little after everything else we have seen.\
+
+If you're interested in reporducing those models, please see model.rmd for source codes. 
 
 ## Conclusion
-In progress...
+All of our graphs suggested that bangs were not heavily tied to important games or situations, and they also showed that they did not correspond to much of a difference in the outcome of pitches or at bats. After this, our models showed many times that the number of bangs in a game was not a significant predictor of whether the Astros won or lost. Additionally, the accuracy for our models was almost always the same regardless of whether or not the number of bangs was included as a predictor (it was only the last model that did not follow this trend). With all of this information, it feels appropriate to conclude that the Astros' cheating scandal did not greatly affect their performance or their results. While their actions were still unethical, perhaps the baseball world can relax a little knowing that the integrity of the game was not as heavily impacted as presumed.
+
