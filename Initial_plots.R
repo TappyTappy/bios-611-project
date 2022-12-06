@@ -1,8 +1,6 @@
 library(tidyverse)
 library(stringi)
 library(viridis)
-library(glmnet)
-library(rsample)
 
 astros <- read_csv("derived_data/astros.csv")
 schedule <- read_csv("derived_data/schedule.csv")
