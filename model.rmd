@@ -1,0 +1,335 @@
+---
+title: "Group Project"
+author: "Yuchen Li"
+contributor: "Grant McGrew, Ariel Wang, Fab Joseph"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Please run source code in a well-established environment. i.e. Libraries and derived data are all loaded.
+
+
+
+The main goal of this rmd file was to construct more models that could accurately predict the significance of bangs and their relation to the Astros winning. We approached this goal by utilizing the glm function and LASSO. Even after implementing these methods, the number of bangs used in a game was not a significant predictor of whether or not the Astros won or lost. To be even more sure, we included more variables in our model, however, the number of bangs remained an insignificant predictor. This conclusion disproves our original hypothesis that bangs had a major impact on the Astros winning.
+
+After analyzing some of the finer details of the cheating scandal, we wanted to see if we could create a model to determine whether or not the bangs were important in determining if the Astros won or lost. After all, the goal of the game is to win, so perhaps the best way to measure the effect of the cheating is to determine its impact on the result a game. Our process will also help us identify other variables that may be influential in determining the result of a game. Below is our very first model and the data set we built in order to help us create the model.
+
+# Model data preparation
+
+```{r echo=TRUE}
+g <- group_by(astros, game_date) %>%
+  summarize(num_bangs=sum(ind)) %>%
+  mutate(date=as.Date.character(game_date, "%m/%d")) %>%
+  arrange(date) %>%
+  mutate(game_number=seq(1:58)) %>%
+  select(game_number, game_date, num_bangs)
+o <- vector(mode="character", 58)
+h <- vector(mode="double", 58)
+a <- vector(mode="double", 58)
+str <- vector(mode="character", 58)
+for(i in 1:58) {
+  for(j in 1:162) {
+    if(g$game_date[i]==schedule_all$Date[j]) {
+      o[i] <- schedule_all$Opp[j]
+      h[i] <- schedule_all$R[j]
+      a[i] <- schedule_all$RA[j]
+    }
+  }
+}
+for(i in 1:58) {
+  for(j in 2:162) {
+    if(g$game_date[i]==schedule_all$Date[j]) {
+      str[i] <- schedule_all$Streak[j-1]
+    }
+  }
+}
+g <- mutate(g, opp=o, runs_for=h, runs_against=a)
+g <- mutate(g, res=ifelse(runs_for>runs_against, 1, 0))
+#
+#str <- str[1:58]
+g <- mutate(g, streak=str)
+w <- vector(mode="double", 58)
+l <- vector(mode="double", 58)
+srs <- vector(mode="double", 58)
+for(i in 1:58) {
+  for(j in 1:30) {
+    if(g$opp[i]==s$Tm[j]) {
+      w[i] <- s$w_pct[j]
+      l[i] <- standings$Luck[j]
+      srs[i] <- standings$SRS[j]
+    }
+  }
+}
+g <- mutate(g, w_pct=w)
+g <- mutate(g, luck=l)
+g <- mutate(g, SRS=srs)
+g <- mutate(g, streak=ifelse(streak=="", "+", streak))
+```
+
+# Models
+This is a glm predicting res with num_bangs, runs_for, w_pct, streak, luck, and SRS. The only significant predictors are runs_for and one of the streak factors (++). The number of bangs is not a significant predictor.
+
+```{r}
+#added streak, luck, and SRS, used runs_against
+m <- glm(res~num_bangs+runs_against+w_pct+streak+luck+SRS, data=g, family="binomial")
+summary(m)
+```
+
+This is a glm predicting res with num_bangs, runs_against, w_pct, streak, luck, and SRS. The only significant predictor is runs_against. The number of bangs is not a significant predictor.
+
+```{r}
+#took out num_bangs, used runs_for
+m <- glm(res~runs_for+w_pct+streak+luck+SRS, data=g, family="binomial")
+summary(m)
+```
+
+This is a glm model similar to the model two before, but without the number of bangs included as a predictor. This model predicts res with runs_for, w_pct, streak, luck, and SRS. The only significant predictors are runs_for and one of the streak factors (++). Therefore, the significant predictors for this model did not change from when num_bangs included.
+
+```{r}
+m <- glm(res~num_bangs+w_pct+SRS+luck+streak, data=g, family="binomial")
+summary(m)
+```
+
+This model gets rid of both runs_for and runs_against, but we go back to using the number of bangs in a game as a predictor. This model predicts res with num_bangs, w_pct, SRS, luck, and streak. The only significant predictor is one of the streak factors (++), so num_bangs is not a significant predictor.
+
+```{r}
+m <- glm(res~num_bangs+SRS+luck+streak, data=g, family="binomial")
+summary(m)
+```
+
+This model is similar to the one directly above, but we omit w_pct as a predictor because both w_pct and SRS are measurements of how good the opponent is (we keep SRS in this example). When predicting res by num_bangs, SRS, luck, and streak, both SRS and the ++ streak factor are signifcant predictors, but num_bangs is not.
+
+The number of bangs in a game has not been a significant predictor of winning/losing in any of the models we have looked at so far. It seems to be getting pretty evident that the Astros' cheating did not impact game results, but we decided to do a little more modeling and analysis just to be sure.
+
+Finally, use LASSO regression analysis (for a glm) to perform both variable selection and regulization so that to enhance our accurracy in prediction. 
+
+````{r}
+set.seed(2268)
+df_split <- initial_split(g, .7)
+df_train <- training(df_split)
+df_test <- testing(df_split)
+
+lasso1 <- select(df_train, -game_number, -game_date, -opp, -runs_for, -runs_against, -res) %>%
+  mutate(streak=factor(streak)) %>%
+  data.matrix %>%
+  glmnet(df_train$res, family = "binomial", alpha = 1, lambda = .1)
+lasso1$beta
+
+#lasso1
+get_accuracy1.1 <- function(df_train, df_test){
+  
+  m <- glm(res ~ w_pct+SRS, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+get_accuracy1.2 <- function(df_train, df_test){
+  
+  m <- glm(res ~ w_pct+SRS+num_bangs, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+df_bin <- get_accuracy1.1(df_train, df_test)
+df_bin$accuracy
+df_bin <- get_accuracy1.2(df_train, df_test)
+df_bin$accuracy
+```
+
+The potential predictors for this LASSO model were num_bangs, streak, w_pct, luck, and SRS. Only w_pct and SRS were chosen as predictors by the LASSO. The accuracy for this model was .647, and the model with num_bangs included had the same accuracy.
+
+```{r}
+#added runs for as a possibility
+lasso2 <- select(df_train, -game_number, -game_date, -opp, -runs_against, -res) %>%
+  mutate(streak=factor(streak)) %>%
+  data.matrix %>%
+  glmnet(df_train$res, family = "binomial", alpha = 1, lambda = .1)
+lasso2$beta
+
+#lasso 2
+get_accuracy2.1 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_for+w_pct+SRS, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+get_accuracy2.2 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_for+w_pct+SRS+num_bangs, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+df_bin <- get_accuracy2.1(df_train, df_test)
+df_bin$accuracy
+df_bin <- get_accuracy2.2(df_train, df_test)
+df_bin$accuracy
+```
+
+The potential predictors for this LASSO model were num_bangs, streak, w_pct, luck, SRS, and runs_for (newly available). The predictors selected were w_pct, SRS, and runs_for. The accuracy of this model was .647, and the model with num_bangs included had the same accuracy.
+
+```{r}
+#added runs_against (took out runs_for)
+lasso3 <- select(df_train, -game_number, -game_date, -opp, -runs_for, -res) %>%
+  mutate(streak=factor(streak)) %>%
+  data.matrix %>%
+  glmnet(df_train$res, family = "binomial", alpha = 1, lambda = .1)
+lasso3$beta
+
+#lasso3
+get_accuracy3.1 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_against+w_pct+SRS, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+get_accuracy3.2 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_against+w_pct+SRS+num_bangs, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+df_bin <- get_accuracy3.1(df_train, df_test)
+df_bin$accuracy
+df_bin <- get_accuracy3.2(df_train, df_test)
+df_bin$accuracy
+```
+
+The potential predictors for this LASSO model were num_bangs, streak, w_pct, luck, SRS, and runs_against (swapped with runs_for). The predictors selected were w_pct, SRS, and runs_against. The accuracy of this model was .882, and the model with num_bangs included had the same accuracy.
+
+```{r}
+#included runs for and runs against
+lasso4 <- select(df_train, -game_number, -game_date, -opp, -res) %>%
+  mutate(streak=factor(streak)) %>%
+  data.matrix %>%
+  glmnet(df_train$res, family = "binomial", alpha = 1, lambda = .1)
+lasso4$beta
+
+#lasso4
+get_accuracy4 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_for+runs_against+w_pct, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+
+df_bin <- get_accuracy4(df_train, df_test)
+df_bin$accuracy
+```
+
+Just to see what would happen, I allowed both runs_for and runs_against to be potential predictors in the LASSO. The process selected them both (although it also selected w_pct, which seems unnecessary, but this may be a by product of fixing our lambda at .1). With both of these predictors included, the accuracy of the model was 1, which means it got all of the predictions correct. This is obvious though because if you know the score of both teams, it is really easy to pick who wins.
+
+However, since this model is what was selected when we allowed all of our predictors to be potential selections, we decided to look at the accuracies of slight variations of this model.
+
+```{r}
+#was a 1 with runs_against too obviously, so I took it out here
+get_accuracy5.1 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_for+w_pct, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+df_bin <- get_accuracy5.1(df_train, df_test)
+df_bin$accuracy
+
+get_accuracy5.2 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_for+w_pct+num_bangs, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+df_bin <- get_accuracy5.2(df_train, df_test)
+df_bin$accuracy
+
+get_accuracy5.3 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_against+w_pct, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+df_bin <- get_accuracy5.3(df_train, df_test)
+df_bin$accuracy
+
+get_accuracy5.4 <- function(df_train, df_test){
+  
+  m <- glm(res ~ runs_against+w_pct+num_bangs, data = df_train, family="binomial")
+  
+  df_test <- mutate(df_test,
+                    yhat = predict(m, newdata = df_test, type="response"))
+  
+  df_test <- mutate(df_test, yhat = ifelse(yhat < .5, 0, 1))
+  df_test <- mutate(df_test, err = yhat != res)
+  
+  return(list(df_test = df_test, accuracy = mean(!df_test$err))) 
+}
+df_bin <- get_accuracy5.4(df_train, df_test)
+df_bin$accuracy
+```
+
+Here, we have 4 different models that we test the accuracy of. The first has predictors runs_for and w_pct. The second adds num_bangs on top of these two. The third model uses runs_against and w_pct as predictors for result, and the fourth adds num_bangs on top of these two. The accuracy values are the same again for the first two corresponding models (corresponding by just adding num_bangs). However, the fourth model, which inludes num_bangs, is more accurate than the third model it corresponds to, which does not include num_bangs. This is the first time we have seen anything like this. In other words, something that might suggest that the amount the Astros cheated and used bangings actually impacted the result of the game (and can therefore help us predict the outcome). However, this is just too little after everything else we have seen.
