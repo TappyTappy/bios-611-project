@@ -54,7 +54,7 @@ Project Organization
 Please see the Makefile for project structure.
 
 
-Analysis Goal:  Create a model that predicts the effect of sign stealing (win or loss).
+Study Goal: analysis the effect of sign stealing on 2017's Astro team
 ===============
 This project focuses on:
 1. The usual outcome of a batting event when a bang was heard (single, double, home run, or grand slam).
