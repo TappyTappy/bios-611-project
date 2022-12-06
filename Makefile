@@ -12,7 +12,7 @@ clean:
 	touch .created-dirs
 
 
-derived_data/astros.csv derived_data/schedule_all.csv derived_data/schedule.csv derived_data/bangs.csv derived_data/none.csv derived_data/standings.csv: .created-dirs source_data/Astros_Schedule.csv MLB_Standings.csv astros_bangs_20200127.csv data_exploration.R
+derived_data/astros.csv derived_data/schedule_all.csv derived_data/schedule.csv derived_data/bangs.csv derived_data/none.csv derived_data/standings.csv: .created-dirs source_data/Astros_Schedule.csv source_data/MLB_Standings.csv source_data/astros_bangs_20200127.csv data_exploration.R
 	Rscript data_exploration.R
 
 
